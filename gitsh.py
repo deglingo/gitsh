@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 
-import readline, subprocess
+import os, readline, subprocess, pwd, socket
 from subprocess import PIPE as CMDPIPE
 
 # cmdexec
@@ -40,9 +40,19 @@ class GitSHApp :
 
 	# _readline
 	def _readline (self) :
-		prompt = '> '
+		prompt = self._get_prompt()
 		line = input(prompt)
 		return LineType.COMMIT, line
+
+	# _get_prompt
+	def _get_prompt (self) :
+		user = pwd.getpwuid(os.getuid()).pw_name
+		host = socket.gethostname()
+		cwd = os.getcwd()
+		isgit = True # [todo]
+		mark = '$' if isgit else '?'
+		prompt = '%s@%s:%s%s ' % (user, host, cwd, mark)
+		return prompt
 
 	# _do_commit:
 	def _do_commit (self, msg) :
