@@ -22,6 +22,7 @@ class LineType :
 
 	COMMIT = 1
 	KEYBOARD_INTERRUPT = 2
+	EMPTY = 3
 
 # GitSHApp
 class GitSHApp :
@@ -49,6 +50,9 @@ class GitSHApp :
 				ltype, line = self._readline()
 				if ltype == LineType.COMMIT :
 					self._do_commit(line)
+				elif ltype == LineType.EMPTY :
+					print()
+					self._print_log()
 				elif ltype == LineType.KEYBOARD_INTERRUPT :
 					print()
 					continue
@@ -66,7 +70,11 @@ class GitSHApp :
 			return LineType.KEYBOARD_INTERRUPT, ''
 		except:
 			raise
-		return LineType.COMMIT, line
+		line = line.strip()
+		if line == '' :
+			return LineType.EMPTY, ''
+		else :
+			return LineType.COMMIT, line
 
 	# _get_prompt
 	def _get_prompt (self) :
