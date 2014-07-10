@@ -4,9 +4,14 @@ import readline, subprocess
 from subprocess import PIPE as CMDPIPE
 
 # cmdexec
-def cmdexec (cmd, **kwargs) :
+def cmdexec (cmd, wait=False, **kwargs) :
 	proc = subprocess.Popen(cmd, **kwargs)
-	return proc
+	if wait :
+		r = proc.wait()
+		assert r == 0, r # [todo]
+		return r
+	else :
+		return proc
 
 # LineType
 class LineType :
@@ -28,13 +33,20 @@ class GitSHApp :
 		while True :
 			self._print_status()
 			ltype, line = self._readline()
-			assert 0, (ltype, line)
+			if ltype == LineType.COMMIT :
+				self._do_commit(line)
+			else :
+				assert 0, (ltype, line)
 
 	# _readline
 	def _readline (self) :
 		prompt = '> '
 		line = input(prompt)
 		return LineType.COMMIT, line
+
+	# _do_commit:
+	def _do_commit (self, msg) :
+		cmdexec(['git', 'commit', '-a', '-m', msg], wait=True)
 
 	# _print_log
 	def _print_log (self) :
