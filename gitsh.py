@@ -52,7 +52,7 @@ class GitSHApp :
 		p = cmdexec(['git', 'log', '-n', '20', '--format=format:%H %ci %s'],
 					stdout=CMDPIPE, universal_newlines=True)
 		for line in p.stdout :
-			logs.append(line.split(None, 4))
+			logs.append(line.strip().split(None, 4))
 		r = p.wait()
 		assert r == 0, r
 		return logs
