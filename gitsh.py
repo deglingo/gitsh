@@ -17,6 +17,7 @@ def cmdexec (cmd, wait=False, **kwargs) :
 class LineType :
 
 	COMMIT = 1
+	KEYBOARD_INTERRUPT = 2
 
 # GitSHApp
 class GitSHApp :
@@ -35,13 +36,21 @@ class GitSHApp :
 			ltype, line = self._readline()
 			if ltype == LineType.COMMIT :
 				self._do_commit(line)
+			elif ltype == LineType.KEYBOARD_INTERRUPT :
+				print()
+				continue
 			else :
 				assert 0, (ltype, line)
 
 	# _readline
 	def _readline (self) :
 		prompt = self._get_prompt()
-		line = input(prompt)
+		try:
+			line = input(prompt)
+		except KeyboardInterrupt:
+			return LineType.KEYBOARD_INTERRUPT, ''
+		except:
+			raise
 		return LineType.COMMIT, line
 
 	# _get_prompt
