@@ -51,12 +51,15 @@ class GitSHApp :
 	# _print_log
 	def _print_log (self) :
 		logs = self._get_log()
+		sep = ' +' + ('-' * 75) + '+'
 		last_date = ''
+		print(sep)
 		for hash, date, hour, tz, msg in logs :
-			print(' | %-10s %s | %s | %-20s |' %
+			print(' | %-10s %s | %s | %-41s |' %
 				  ((date if date != last_date else ''),
-				   hour, hash[:7], msg))
+				   hour, hash[:7], msg[:41]))
 			last_date = date
+		print(sep)
 
 	# _get_log
 	def _get_log (self) :
