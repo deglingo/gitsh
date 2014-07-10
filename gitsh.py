@@ -3,6 +3,10 @@
 import os, readline, subprocess, pwd, socket
 from subprocess import PIPE as CMDPIPE
 
+CONFIG_DIR = os.path.join(os.environ['HOME'], '.gitsh')
+HISTORY_FILE = os.path.join(CONFIG_DIR, 'history')
+HISTORY_LENGTH = 1000
+
 # cmdexec
 def cmdexec (cmd, wait=False, **kwargs) :
 	proc = subprocess.Popen(cmd, **kwargs)
@@ -30,17 +34,28 @@ class GitSHApp :
 
 	# run
 	def run (self) :
-		self._print_log()
-		while True :
-			self._print_status()
-			ltype, line = self._readline()
-			if ltype == LineType.COMMIT :
-				self._do_commit(line)
-			elif ltype == LineType.KEYBOARD_INTERRUPT :
-				print()
-				continue
-			else :
-				assert 0, (ltype, line)
+		# create config dir
+		if not os.path.isdir(CONFIG_DIR) :
+			os.mkdir(CONFIG_DIR)
+		# load history
+		if os.path.exists(HISTORY_FILE) :
+			readline.read_history_file(HISTORY_FILE)
+		readline.set_history_length(HISTORY_LENGTH)
+		# main loop
+		try:
+			self._print_log()
+			while True :
+				self._print_status()
+				ltype, line = self._readline()
+				if ltype == LineType.COMMIT :
+					self._do_commit(line)
+				elif ltype == LineType.KEYBOARD_INTERRUPT :
+					print()
+					continue
+				else :
+					assert 0, (ltype, line)
+		finally:
+			readline.write_history_file(HISTORY_FILE)
 
 	# _readline
 	def _readline (self) :
