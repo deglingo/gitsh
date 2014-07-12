@@ -15,8 +15,9 @@ def quote_cmd (cmd) :
                     for a in cmd)
         
 # cmdexec
-def cmdexec (cmd, wait=False, **kwargs) :
-    print('> %s' % quote_cmd(cmd))
+def cmdexec (cmd, wait=False, dotrace=True, **kwargs) :
+    if dotrace :
+        print('> %s' % quote_cmd(cmd))
     proc = subprocess.Popen(cmd, **kwargs)
     if wait :
         r = proc.wait()
@@ -126,7 +127,7 @@ class GitSHApp :
     def _get_log (self) :
         logs = []
         p = cmdexec(['git', 'log', '-n', '20', '--format=format:%H %ci %s'],
-                    stdout=CMDPIPE, universal_newlines=True)
+                    stdout=CMDPIPE, universal_newlines=True, dotrace=False)
         for line in p.stdout :
             logs.append(line.strip().split(None, 4))
         r = p.wait()
@@ -147,7 +148,7 @@ class GitSHApp :
     # _get_status
     def _get_status (self) :
         p = cmdexec(['git', 'status', '--branch', '--porcelain', '--untracked=all'],
-                    stdout=CMDPIPE, universal_newlines=True)
+                    stdout=CMDPIPE, universal_newlines=True, dotrace=False)
         branch = p.stdout.readline().strip()
         assert branch[:3] == '## ', branch
         branch = branch.split(None, 1)[1]
