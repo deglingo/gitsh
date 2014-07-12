@@ -34,6 +34,17 @@ class LineType :
     EMPTY = 3
     GITCMD = 4
 
+# Completer
+class Completer :
+
+    # __call__
+    def __call__ (self, text, state) :
+        print('\nCMPL: "%s" (%d)"' % (text, state))
+        if state == 0 :
+            return text + 'CPL'
+        else :
+            return None
+        
 # GitSHApp
 class GitSHApp :
 
@@ -52,6 +63,10 @@ class GitSHApp :
         if os.path.exists(HISTORY_FILE) :
             readline.read_history_file(HISTORY_FILE)
         readline.set_history_length(HISTORY_LENGTH)
+        # setup completion
+        cmpl = Completer()
+        readline.parse_and_bind('tab: complete')
+        readline.set_completer(cmpl)
         # main loop
         try:
             self._print_log()
