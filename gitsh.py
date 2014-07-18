@@ -15,13 +15,17 @@ def quote_cmd (cmd) :
                     for a in cmd)
         
 # cmdexec
-def cmdexec (cmd, wait=False, dotrace=True, **kwargs) :
+def cmdexec (cmd, wait=False, dotrace=True, doraise=False, **kwargs) :
     if dotrace :
         print('> %s' % quote_cmd(cmd))
     proc = subprocess.Popen(cmd, **kwargs)
     if wait :
         r = proc.wait()
-        assert r == 0, r # [todo]
+        if r != 0 :
+            if doraise :
+                assert 0, r # [todo]
+            if dotrace :
+                print('> %s command failed: %d' % (cmd[0], r))
         return r
     else :
         return proc
@@ -123,7 +127,7 @@ class GitSHApp :
     # _do_gitcmd
     def _do_gitcmd (self, line) :
         cmd = ['git'] + shlex.split(line)
-        cmdexec(cmd, wait=True)
+        cmdexec(cmd, wait=True, doraise=False)
 
     # _print_log
     def _print_log (self) :
