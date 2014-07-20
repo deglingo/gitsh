@@ -11,6 +11,7 @@ HISTORY_LENGTH = 1000
 GITSH_ROOTDIR = '/src'
 
 GIT_COMMAND_CHAR = '!'
+SHELL_COMMAND_CHAR = '$'
 
 def quote_cmd (cmd) :
     # unsafe! only used for logging
@@ -40,6 +41,7 @@ class LineType :
     KEYBOARD_INTERRUPT = 2
     EMPTY = 3
     GITCMD = 4
+    SHCMD = 5
 
 # Completer
 class Completer :
@@ -95,6 +97,8 @@ class GitSHApp :
                     self._print_log()
                 elif ltype == LineType.GITCMD :
                     self._do_gitcmd(line)
+                elif ltype == LineType.SHCMD :
+                    self._do_shcmd(line)
                 elif ltype == LineType.KEYBOARD_INTERRUPT :
                     print()
                     continue
@@ -118,6 +122,9 @@ class GitSHApp :
         elif line[0] == GIT_COMMAND_CHAR :
             line = line[1:].strip()
             return LineType.GITCMD, line
+        elif line[0] == SHELL_COMMAND_CHAR :
+            line = line[1:].strip()
+            return LineType.SHCMD, line
         else :
             return LineType.COMMIT, line
 
@@ -139,6 +146,17 @@ class GitSHApp :
     def _do_gitcmd (self, line) :
         cmd = ['git'] + shlex.split(line)
         cmdexec(cmd, wait=True, doraise=False)
+
+    # _do_shcmd
+    def _do_shcmd (self, line) :
+        proc = cmdexec(['bash', '-s'], wait=False,
+                       universal_newlines=True,
+                       stdin=CMDPIPE)
+        proc.stdin.write(line)
+        proc.stdin.write('\n')
+        proc.stdin.close()
+        r = proc.wait()
+        print('> shell command exit: %s' % r)
 
     # _print_log
     def _print_log (self) :
