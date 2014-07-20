@@ -1,11 +1,14 @@
 #!/usr/bin/python3
 
-import os, readline, subprocess, pwd, socket, shlex
+import os, sys, readline, subprocess, pwd, socket, shlex
 from subprocess import PIPE as CMDPIPE
 
 CONFIG_DIR = os.path.join(os.environ['HOME'], '.gitsh')
 HISTORY_FILE = os.path.join(CONFIG_DIR, 'history')
 HISTORY_LENGTH = 1000
+
+# [fixme] config
+GITSH_ROOTDIR = '/src'
 
 GIT_COMMAND_CHAR = '!'
 
@@ -60,6 +63,14 @@ class GitSHApp :
 
     # run
     def run (self) :
+        # parse command line
+        args = sys.argv[1:]
+        assert len(args) <= 1, args
+        if args :
+            wd = args[0]
+            if not any(a in args[0] for a in ('.', '/')) :
+                wd = os.path.join(GITSH_ROOTDIR, wd)
+            os.chdir(wd)
         # create config dir
         if not os.path.isdir(CONFIG_DIR) :
             os.mkdir(CONFIG_DIR)
