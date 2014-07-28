@@ -12,6 +12,7 @@ GITSH_ROOTDIR = '/src'
 
 GIT_COMMAND_CHAR = '!'
 SHELL_COMMAND_CHAR = '$'
+GIT_AMEND_CHAR = '@'
 
 def quote_cmd (cmd) :
     # unsafe! only used for logging
@@ -42,6 +43,7 @@ class LineType :
     EMPTY = 3
     GITCMD = 4
     SHCMD = 5
+    AMEND = 6
 
 # Completer
 class Completer :
@@ -92,6 +94,8 @@ class GitSHApp :
                 ltype, line = self._readline()
                 if ltype == LineType.COMMIT :
                     self._do_commit(line)
+                elif ltype == LineType.AMEND :
+                    self._do_amend(line)
                 elif ltype == LineType.EMPTY :
                     print()
                     self._print_log()
@@ -125,6 +129,9 @@ class GitSHApp :
         elif line[0] == SHELL_COMMAND_CHAR :
             line = line[1:].strip()
             return LineType.SHCMD, line
+        elif line[0] == GIT_AMEND_CHAR :
+            line = line[1:].strip()
+            return LineType.AMEND, line
         else :
             return LineType.COMMIT, line
 
@@ -141,6 +148,11 @@ class GitSHApp :
     # _do_commit:
     def _do_commit (self, msg) :
         cmdexec(['git', 'commit', '-a', '-m', msg], wait=True)
+
+    # _do_amend:
+    def _do_amend (self, msg) :
+        assert msg # [todo] get last message if msg == ''
+        cmdexec(['git', 'commit', '-a', '--amend', '-m', msg], wait=True)
 
     # _do_gitcmd
     def _do_gitcmd (self, line) :
