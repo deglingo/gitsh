@@ -151,7 +151,12 @@ class GitSHApp :
 
     # _do_amend:
     def _do_amend (self, msg) :
-        assert msg # [todo] get last message if msg == ''
+        if msg == '' :
+            proc = cmdexec(['git', 'log', '-n', '1', '--format=format:%s'],
+                           dotrace=False, stdout=CMDPIPE, universal_newlines=True)
+            msg = proc.stdout.read().strip()
+            r = proc.wait()
+            assert r == 0, r
         cmdexec(['git', 'commit', '-a', '--amend', '-m', msg], wait=True)
 
     # _do_gitcmd
